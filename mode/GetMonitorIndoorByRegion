@@ -1,0 +1,1 @@
+{"state":"success", "message":"获取室内监控点统计数据信息成功！", "data":[{"id":"1","name":"体育馆","count":"8"},{"id":"2","name":"图书馆","count":"8"},{"id":"3","name":"宿舍楼","count":"22"},{"id":"4","name":"教学楼","count":"10"},{"id":"8","name":"行政楼食堂","count":"22"}]}

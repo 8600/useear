@@ -1,0 +1,558 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" type="text/css" href="./css/reset.css" />
+    <link rel="stylesheet" type="text/css" href="./css/vuescroll.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bz.css" />
+    <link rel="stylesheet" type="text/css" href="./css/mars.css" />
+
+    <title>智慧校园可视化平台</title>
+    <script src="./js/jquery-1.10.2.js"></script>
+
+    <script src="./js/layui.js"></script>
+<script src="./js/sweetalert2.js"></script>
+<script src="./js/Cesium.js"></script>
+<script src="./js/GlobeAlert.js"></script>
+<script src="./js/Config.js"></script>
+<script src="./js/HashTable.js"></script>
+<script src="./js/Measure.js"></script>
+<script src="./js/GlobeEngine.js"></script>
+
+    <link href="./css/layui.css" rel="stylesheet"/>
+<link href="./css/sweetalert2.css" rel="stylesheet"/>
+<link href="./css/widgets.css" rel="stylesheet"/>
+<link href="./css/default.css" rel="stylesheet"/>
+
+</head>
+<body>
+    <div class="main" id="App">
+        <!--地图底图-->
+        <div id="cesiumContainer"></div>
+
+        <!--加载弹窗-->
+        <div class="loading-pop">
+            <div class="loading-position">
+                <div id="preloader_4">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <p>正在加载中...</p>
+            </div>
+        </div>
+        <!--全屏按钮-->
+        <div class="full-screen-btn" v-on:click="screenFull">
+            <img src="./img/screen.png" />
+        </div>
+
+        <!--头部标题-->
+        <div class="header">智慧校园可视化平台</div>
+
+        <!--主页模块-->
+        <div class="left-container" v-show="isShow == 1">
+            <div class="home-box1 box">
+                <div class="title">视频监控</div>
+                <div class="content">
+                    <ul class="video clearfloat fl">
+                        <li v-for="item in monitorUrl" v-on:click="showVideo(item.url)">
+                            <video :src="item.url" autoplay="autoplay" loop="loop"></video>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="home-box2 box">
+                <div class="title">学生出勤信息</div>
+                <div class="content">
+                    <div id="main1" style="width: 100%;height: 40%;"></div>
+                    <div id="main2" style="width: 100%;height: 60%;"></div>
+                </div>
+            </div>
+            <div class="home-box3 box">
+                <div class="title">宿舍进出信息</div>
+                <div class="content">
+                    <div id="main3" style="width: 100%;height: 100%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="right-container" v-show="isShow == 1">
+            <div class="home-box4 box">
+                <div class="title">环境信息</div>
+                <div class="content">
+                    <div class="message clearfloat">
+                        <div class="m-temp">
+                        	<h3>{{weather.temp}}<span>°C</span></h3>
+			    			<p>{{weather.city}}</p>
+                        </div>
+                        <div class="m-time">
+                            <h2>{{nowTime}}</h2>
+                            <h5>{{week}}</h5>
+                            <ul class="clearfloat fl environmental">
+                                <li><i></i>湿度：{{weather.sd}}%</li>
+                                <li><i></i>空气质量：{{weather.aqi}}</li>
+                                <li><i></i>风力：{{weather.ws}}</li>
+                                <li><i></i>风向：{{weather.wd}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="atmosphere">
+                        <ul class="clearfloat fl">
+                            <li>
+                                <img src="./img/PM10.png" />
+                                <p>{{weather.pm10}}</p>
+                            </li>
+                            <li>
+                                <img src="./img/PM2.5.png" />
+                                <p>{{weather.pm2_5}}</p>
+                            </li>
+                            <li>
+                                <img src="./img/co.png" />
+                                <p>{{weather.co}}</p>
+                            </li>
+                            <li>
+                                <img src="./img/no.png" />
+                                <p>{{weather.no2}}</p>
+                            </li>
+                            <li>
+                                <img src="./img/so.png" />
+                                <p>{{weather.so2}}</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="home-box5 box">
+                <div class="title">停车场信息预览</div>
+                <div class="content">
+                    <ul class="clearfloat fl parking">
+                        <li>
+                            <h5>车辆警戒值</h5>
+                            <p>400<span>辆</span></p>
+                        </li>
+                        <li>
+                            <h5>剩余停车位</h5>
+                            <p>228<span>位</span></p>
+                        </li>
+                        <li>
+                            <h5>停车位总数</h5>
+                            <p>500<span>位</span></p>
+                        </li>
+                        <li>
+                            <h5>历史均值</h5>
+                            <p>284<span>辆</span></p>
+                        </li>
+                        <li>
+                            <h5>平均值差额</h5>
+                            <p>39<span>辆</span></p>
+                        </li>
+                        <li>
+                            <h5>出校车辆总计</h5>
+                            <p>694<span>辆</span></p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="home-box6 box">
+                <div class="title">实时车辆性质分析</div>
+                <div class="content">
+                    <div id="main4" style="width: 100%;height: 100%;"></div>
+                </div>
+            </div>
+            <div class="home-box7 box">
+                <div class="title">日车流统计分析</div>
+                <div class="content">
+                    <div id="main5" style="width: 100%;height: 100%;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="center-container" v-show="isShow == 1">
+            <div id="StudentNum" class="home-statistics" style="left: 62px;">
+                <p>实时在校学生人数：</p>
+                <div class="num">
+                	<div class="item" v-for="(item,index) in studentNum">
+                		<span >{{item}}</span>
+                	</div>
+                </div>
+            </div>
+            <div id="CartNum" class="home-statistics" style="right: 120px;">
+                <p>实时入校车辆总数：</p>
+                <div class="num">
+                	<div class="item" v-for="(item,index) in carNum">
+                		<span>{{item}}</span>
+                	</div>
+                </div>
+            </div>
+        </div>
+
+        <!--学生模块-->
+        <div class="left-container" v-show="isShow == 2">
+            <div class="student-box1 box">
+                <div class="title">实时学生数据</div>
+                <div class="content">
+                    <div class="message clearfloat">
+                        <p class="s-num"><i class="team"></i>在校学生数<span v-text="studentAll"></span>人</p>
+                    </div>
+                    <div class="atmosphere" style="margin-top: 0;">
+                        <ul class="clearfloat fl abnormal-list">
+                            <li>
+                                <p>请假人数</p>
+                                <p><span v-text="leave"></span>人</p>
+                            </li>
+                            <li>
+                                <p>旷课人数</p>
+                                <p><span v-text="absenteeism"></span>人</p>
+                            </li>
+                            <li>
+                                <p>迟到人数</p>
+                                <p><span v-text="late"></span>人</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="student-box2 box">
+                <div class="title">学生出勤信息</div>
+                <div class="content" style="top: 45px;left: 3px;bottom: 3px;right: 3px;">
+                    <div id="main6" style="width: 100%;height: 40%;"></div>
+                    <div class="t-box t-abnormal" style="width: 100%;height: 60%;">
+                        <div class="thead" style="width: 100%;height: 35px;">
+                            <span style="width: 20%;">姓名</span>
+                            <span style="width: 20%;">年级</span>
+                            <span style="width: 30%;">班级</span>
+                            <span style="width: 30%;">异常情况</span>
+                        </div>
+                        <div class="tbody" style="width: 100%;height: 360px;">
+                        	<vue-scroll :ops="ops">
+	                        	<div class="t-item" v-for="item in abnormalList">
+	                        		<span style="width: 20%;" v-text="item.inoutuser_name">姓名</span>
+		                            <span style="width: 20%;" v-text="item.inoutuser_gradename">年级</span>
+		                            <span style="width: 30%;" v-text="item.inoutuser_classname">班级</span>
+		                            <span style="width: 30%;">{{ item.check_remark|remark }}</span>
+	                        	</div>
+	                        	<p class="nodata" v-if="abnormalList.length == 0">暂无数据</p>
+                        	</vue-scroll>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right-container" v-show="isShow == 2">
+            <div class="student-box3 box">
+                <div class="title">出入校园信息</div>
+                <div class="content" style="top: 45px;left: 3px;bottom: 3px;right: 3px;">
+                    <div style="width: 100%;height: 40%;position: relative;">
+                        <div class="student-in-out" style="left: 60px;top: 65px;">
+                            <h5><span v-text="walksNum"></span>人</h5>
+                            <p>走读生出校记录</p>
+                        </div>
+                        <div class="student-in-out" style="left: 220px;top: 65px;">
+                            <h5><span v-text="leavesNum"></span>人</h5>
+                            <p>请假生出校记录</p>
+                        </div>
+                    </div>
+                    <div style="width: 95%;height: 50px;text-align: right;">
+                        <a href="javascript:void(0)" class="dormitory-tab" v-on:click="switchStatus(1)" :class="{active:studentOutInDetail == studentOut}">
+                            <p>出校记录</p>
+                        </a>
+                        <a href="javascript:void(0)" class="dormitory-tab" v-on:click="switchStatus(2)" :class="{active:studentOutInDetail == studentIn}">
+                            <p>入校记录</p>
+                        </a>
+                    </div>
+                    <div class="t-box input-table" style="width: 100%;">
+                        <div class="thead" style="width: 100%;height: 35px;">
+                            <span style="width: 20%;">姓名</span>
+                            <span style="width: 20%;">年级</span>
+                            <span style="width: 15%;">班级</span>
+                            <span style="width: 15%;">性别</span>
+                            <span style="width: 30%;">出(入)校时间</span>
+                        </div>
+                        <div class="tbody" style="width: 100%;height: 180px;">
+                        	<vue-scroll :ops="ops">
+	                        	<div class="t-item" v-for="item in studentOutInDetail">
+	                        		<span style="width: 20%;" v-text="item.inout_user_name">姓名</span>
+		                            <span style="width: 20%;" v-text="item.grade_name">年级</span>
+		                            <span style="width: 15%;" v-text="item.class_name">班级</span>
+		                            <span style="width: 15%;">{{ item.sex|sexData }}</span>
+		                            <span style="width: 30%;">{{ item.inout_time|showTime }}</span>
+	                        	</div>
+	                        	<p class="nodata" v-if="studentOutInDetail.length == 0">暂无数据</p>
+                        	</vue-scroll>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="student-box4 box">
+                <div class="title">宿舍进出信息</div>
+                <div class="content" style="top: 45px;left: 3px;bottom: 3px;right: 3px;">
+                    <div id="main7" style="width: 100%;height: 40%;"></div>
+                    <div class="t-box" style="width: 100%;margin-top: 10px;">
+                        <div class="thead" style="width: 100%;height: 35px;">
+                            <span style="width: 20%;">姓名</span>
+                            <span style="width: 15%;">年级</span>
+                            <span style="width: 15%;">班级</span>
+                            <span style="width: 10%;">性别</span>
+                            <span style="width: 10%;">楼号</span>
+                            <span style="width: 10%;">状态</span>
+                            <span style="width:20%;">进出时间</span>
+                        </div>
+                        <div class="tbody" style="width: 100%;height: 200px;">
+                        	<vue-scroll :ops="ops">
+                            <div class="t-item" v-for="item in dormitoryDetail">
+                                <span style="width: 20%;" v-text="item.name">姓名</span>
+                                <span style="width: 15%;" v-text="item.grade">年级</span>
+                                <span style="width: 15%;" v-text="item.class">班级</span>
+                                <span style="width: 10%;" v-text="item.sex">性别</span>
+                                <span style="width: 10%;" v-text="item.dormitory_id">}</span>
+                                <span style="width: 10%;">{{item.student_status | showStatus }}</span>
+                                <span style="width: 20%;">{{item.inout_time | showTime }}</span>
+                            </div>
+                            <p class="nodata" v-if="dormitoryDetail.length == 0">暂无数据</p>
+                            </vue-scroll>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--车辆模块-->
+        <div class="center-container" v-show="isShow == 3">
+            <div class="car-statistics">
+                <ul class="fl clearfloat">
+                    <li>
+                        <img src="./img/car3.png" />
+                        <div class="s-content">
+                            <p>实时在校车辆</p>
+                            <p><span v-text="carAll">156</span>辆</p>
+                        </div>
+                    </li>
+                    <li>
+                        <img src="./img/parking.png" />
+                        <div class="s-content">
+                            <p>校内停车位</p>
+                            <p><span >1000</span>个</p>
+                        </div>
+                    </li>
+                    <li>
+                        <img src="./img/parking.png" />
+                        <div class="s-content">
+                            <p>剩余停车位</p>
+                            <p><span v-text="1000-carAll"></span>个</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="left-container" v-show="isShow == 3">
+            <div class="car-box1 box">
+                <div class="title">实时车辆性质分析</div>
+                <div class="content" style="top: 45px;left: 3px;bottom: 3px;right: 3px;">
+                    <div id="main8" style="width: 100%;height: 40%;"></div>
+                    <div class="t-box" style="width: 100%;" >
+                        <div class="thead" style="width: 100%;height: 35px;">
+                            <span style="width: 25%;">车牌</span>
+                            <span style="width: 25%;">入校时间</span>
+                            <span style="width: 20%;">在校时长</span>
+                            <span style="width: 30%;">车辆性质</span>
+                        </div>
+                        <div class="tbody" style="width: 100%;height: 210px;">
+                        	<vue-scroll :ops="ops">
+	                        	<div class="t-item" v-for="item in carList">
+	                        		<span style="width: 25%;" v-text="item.car_no">车牌</span>
+		                            <span style="width: 25%;">{{item.inout_time|showTime}}</span>
+		                            <span style="width: 20%;" v-text="item.duration"></span>
+		                            <span style="width: 30%;" v-text="item.car_type">车辆性质</span>
+	                        	</div>
+	                        	<p class="nodata" v-if="carList.length == 0">暂无数据</p>
+                        	</vue-scroll>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="car-box2 box">
+                <div class="title">历史车辆性质分析</div>
+                <div class="content" style="top: 45px;left: 3px;bottom: 3px;right: 3px;">
+                    <div id="main9" style="width: 100%;height: 50%;"></div>
+                    <div class="t-box ctable2" style="width: 100%;">
+                        <div class="thead" style="width: 100%;height: 35px;">
+                            <span style="width: 30%;">车牌</span>
+                            <span style="width: 30%;">车辆性质</span>
+                            <span style="width: 40%;">进出次数</span>
+                        </div>
+                        <div class="tbody" style="width: 100%;height: 172px;">
+                        	<vue-scroll :ops="ops">
+	                        	<div class="t-item" v-for="item in carDetail">
+	                        		<span style="width: 30%;" v-text="item.car_no">车牌</span>
+		                            <span style="width: 30%;" v-text="item.car_type"></span>
+		                            <span style="width: 40%;" v-text="item.count">车辆性质</span>
+	                        	</div>
+	                        	<p class="nodata" v-if="carDetail.length == 0">暂无数据</p>
+                        	</vue-scroll>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right-container" v-show="isShow == 3">
+            <div class="car-box3 box">
+                <div class="title">车流量分析</div>
+                <div class="content" style="top: 45px;left: 3px;bottom: 3px;right: 3px;">
+                    <div id="main10" style="width: 100%;height: 20%;"></div>
+                    <div style="width:100%;height: 9%;text-align: right;">
+                        <a href="javascript:void(0)" class="dormitory-tab" style="margin-top: 10px;" v-on:click="switchTime(1)" :class="{active:timeFlag ==1}">
+                            <p>年</p>
+                        </a>
+                        <a href="javascript:void(0)" class="dormitory-tab" style="margin-top: 10px;" v-on:click="switchTime(2)" :class="{active:timeFlag ==2}">
+                            <p>月</p>
+                        </a>
+                        <a href="javascript:void(0)" class="dormitory-tab" style="margin-top: 10px;" v-on:click="switchTime(3)" :class="{active:timeFlag ==3}">
+                            <p>日</p>
+                        </a>
+                        <a href="javascript:void(0)" class="dormitory-tab" style="margin-right: 30px;margin-top: 10px;" v-on:click="switchTime(4)" :class="{active:timeFlag ==4}">
+                            <p>时</p>
+                        </a>
+                        <h3 class="car-title">实时车辆进出信息</h3>
+                    </div>
+                    <div class="t-box" style="width: 100%;height: 71%;overflow: hidden;" >
+                    	<!--<transition name="drop" >-->
+                    	<div v-if="realCar.length!=0">
+                        <ul class="car-list">
+                            <li v-for="item in realCar">
+                                <img :src="item.photo_capture_pic_name" />
+                                <div class="car-detail">
+                                    <p>车牌:{{item.car_no}}</p>
+                                    <p>车辆性质:{{item.car_type}}</p>
+                                    <p>出入记录：</p>
+                                    <p>{{item.inout_time | showAllTime}}</p>
+                                </div>
+                            </li>
+                        </ul>
+                        </div>
+                        <!--</transition>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--监控模块-->
+        <div class="left-container" v-show="isShow == 4">
+            <div class="monitor-box1 box">
+                <div class="title">视频监控信息</div>
+                <div class="content">
+                    <div class="monitor-video">
+                        <video :src="monitorMUrl" autoplay="autoplay" loop="loop"></video>
+                        <p v-text="monitorName"></p>
+                    </div>
+                    <div class="title">监控点列表</div>
+                    <div class="monitor-list">
+                        <div class="item" v-for="mitem in monitor">
+                            <p v-on:click="showMonitor(mitem)"><i class="layui-icon">&#xe602;</i>{{mitem.title}}</p>
+                            <!--<transition name="fade" >-->
+                            <ul >
+                                <li v-for="item in mitem.items" v-text="item.name" v-on:click="showMonitor(item.name,item.murl)"></li>
+                            </ul>
+                            <!--</transition>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right-container" v-show="isShow == 4">
+            <div class="monitor-box2 box">
+                <div class="title">校园监控数信息</div>
+                <div class="content">
+                    <div id="main11" style="width: 100%;height: 203px;"></div>
+                    <div class="title" v-text="floorName"></div>
+                    <div id="main12" style="width: 100%;height: 280px;"></div>
+                    <div class="title">监控点列表</div>
+                    <div class="t-box" style="width: 98%;padding: 0 1%;">
+                        <div class="thead" style="width: 100%;height: 35px;">
+                            <span style="width: 30%;">名称</span>
+                            <span style="width: 40%;">点位</span>
+                            <span style="width: 30%;">位置</span>
+                        </div>
+                        <div class="tbody" style="width: 100%;height: 325px;">
+                        	<vue-scroll :ops="ops">
+                            <div class="t-item" v-for="item in monitorDetail">
+                                <span style="width: 30%;" v-text="item.name"></span>
+                                <span style="width: 40%;" v-text="item.address"></span>
+                                <span style="width: 30%;" v-text="item.title"></span>
+                            </div>
+                            </vue-scroll>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="center-container" v-show="isShow == 4">
+			<div class="car-statistics">
+                <ul class="fl clearfloat">
+                    <li>
+                        <img src="./img/jkicon.png" />
+                        <div class="s-content">
+                            <p>室外监控数</p>
+                            <p><span v-text="monitorOut"></span>个</p>
+                        </div>
+                    </li>
+                    <li style="background: none;">
+                    </li>
+                    <li>
+                        <img src="./img/jkicon.png" />
+                        <div class="s-content">
+                            <p>室内监控数</p>
+                            <p><span v-text="monitorIn"></span>个</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!--底部菜单-->
+        <div class="bottom-container">
+            <ul>
+                <li  v-on:click="setShow(1)">
+                    <p>主页</p>
+                    <div :class="{circlebgy:isShow ==1,circlebg:isShow !=1}"></div>
+                    <img src="./img/icon-home.png" />
+                </li>
+                <li v-on:click="setShow(2)">
+                    <p>学生</p>
+                    <div :class="{circlebgy:isShow ==2,circlebg:isShow !=2}"></div>
+                    <img src="./img/icon-student.png" />
+                </li>
+                <li  v-on:click="setShow(3)">
+                    <p>车辆</p>
+                    <div :class="{circlebgy:isShow ==3,circlebg:isShow !=3}"></div>
+                    <img src="./img/icon-car.png" />
+                </li>
+                <li  v-on:click="setShow(4)">
+                    <p>监控</p>
+                    <div :class="{circlebgy:isShow ==4,circlebg:isShow !=4}"></div>
+                    <img src="./img/icon-jk.png" />
+                </li>
+                <li id="BtnLocate" v-on:click="locateMap">
+                    <p>定位</p>
+                    <div class="circlebg"></div>
+                    <img src="./img/icon-local.png" />
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+<script src="./js/echarts.js" type="text/javascript" charset="utf-8"></script>
+<script src="./js/api.js" type="text/javascript" charset="utf-8"></script>
+<script src="./js/monitor.js" type="text/javascript" charset="utf-8"></script>
+<script src="./js/vue.js"></script>
+<script src="./js/vuescroll.js"></script>
+<script src="./js/axios.min.js"></script>
+<script src="./js/VueIndex.js" type="text/javascript" charset="utf-8"></script>

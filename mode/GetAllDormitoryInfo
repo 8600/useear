@@ -1,0 +1,1 @@
+{"state":"success", "message":"获取宿舍信息！", "data":[{"id":"1","name":"一号宿舍楼","total_count":"81","in_count":"43","out_count":"38"},{"id":"2","name":"二号宿舍楼","total_count":"82","in_count":"50","out_count":"32"},{"id":"4","name":"四号宿舍楼","total_count":"162","in_count":"83","out_count":"79"},{"id":"3","name":"三号宿舍楼","total_count":"178","in_count":"93","out_count":"85"}]}
